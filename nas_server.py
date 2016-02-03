@@ -3,11 +3,25 @@ import os
 
 app = Flask(__name__)
 
-def get_files_as_dict(root):
-	all_files = []
+def get_files_from_root(root):
+	all_files = {}
 	for path, subdirs, files in os.walk(root):
-		for name in files:
-			all_files.append(os.path.join(path, name))
+		all_files['path'] = path
+		children = []
+
+		def add_files(my_list, is_dir):
+			for name in my_list:
+				if not name.startswith("."):
+					children.append({'is_dir': is_dir, 'filename': name})
+
+		add_files(subdirs, True)
+		add_files(files, False)
+
+		sorted_children = sorted(children, key=lambda x: x['filename'].lower())
+
+		all_files['children'] = sorted_children
+
+		break
 
 	return all_files
 
@@ -18,7 +32,7 @@ def get_files():
 
 	root = request.json['root']
 
-	return jsonify({'files': get_files_as_dict(root)})
+	return jsonify({'files': get_files_from_root(root)})
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")

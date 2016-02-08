@@ -38,16 +38,15 @@ def upload_file():
 
 @app.route('%s/files' % BASE_URI, methods=['PUT'])
 def update_file():
-	required_args = ['filename','directory_path', 'new_filename']
+	required_args = ['source', 'destination']
 	
 	if not request.json or not  all ([k in request.json for k in required_args]):
 		abort(400)
 
-	filename = request.json['filename']
-	dir_path = request.json['directory_path']
-	new_filename = request.json['new_filename']
+	source = request.json['source']
+	destination = request.json['destination']
 
-	return "Request to rename %s to %s" % (filename, new_filename)
+	return "Request to rename %s to %s" % (source, destination)
 
 @app.route('%s/files' % BASE_URI, methods=['DELETE'])
 def delete_file():
@@ -57,7 +56,6 @@ def delete_file():
 		abort(400)
 
 	return "Requested to delete the following: %s" % path
-
 
 
 if __name__ == '__main__':

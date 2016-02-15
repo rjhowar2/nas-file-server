@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, abort
-from nas_utils import get_directory_contents
+from utils import get_directory_contents
 
 app = Flask(__name__)
 

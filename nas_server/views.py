@@ -14,10 +14,15 @@ def reset_test_files():
 	rebuild_test_tree()
 	return jsonify({'files': get_directory_contents(TEST_DIR)})
 
+@app.route('%s/directory/root' % BASE_URI, methods=['GET'])
+def get_base_directory():
+	return jsonify({'base_directory': app.config['base_directory']})
+
 @app.route('%s/directory' % BASE_URI, methods=['GET'])
 def directory_contents():
 
 	path = request.args.get('path', None)
+	print path
 
 	if not path:
 		abort(400)
@@ -61,9 +66,8 @@ def upload():
 
 	return jsonify(response)
 
-
 @app.route('%s/files' % BASE_URI, methods=['GET'])
-def new_view_name():
+def download():
 	dir_path = request.args.get('path', None)
 	filename = request.args.get('filename', None)
 
@@ -72,7 +76,6 @@ def new_view_name():
 
 	return send_from_directory(dir_path, filename)
 
-
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify(ApiError("Not found")), 404)
@@ -80,4 +83,8 @@ def not_found(error):
 @app.errorhandler(400)
 def not_found(error):
     return make_response(jsonify(ApiError("Bad request")), 400)
+
+@app.errorhandler(405)
+def not_found(error):
+    return make_response(jsonify(ApiError("Method not allowed")), 405)
 

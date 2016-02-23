@@ -1,16 +1,29 @@
 import os
 import shutil
 
+from nas_server import app
 from tests.test_utils import TEST_DIR, rebuild_test_tree
 
 def api_error(message,code=None):
 	response = {
 		"error": {
-			"messgae": message,
+			"message": message,
 			"code": code
 		}
 	}
 	return response
+
+class ApiError(dict):
+	def __init__(self, message, code=None):
+		self["error"] = {
+			"message": message,
+			"code": code
+		}
+
+class ApiSuccess(dict):
+	def __init__(self, action, path):
+		self["action"] = action
+		self["path"] = path
 
 def api_success(action, path):
 	response = {
@@ -65,4 +78,29 @@ def delete_resource(path):
 		response = api_error(str(e))
 
 	return response
+
+def save_file(path, file_obj):
+	filename = file_obj.filename
+	file_length = file_obj.content_length
+
+	if not _valid_file(filename):
+		response = ApiError("%s is not a supported file type" % filename)
+
+	elif not _enough_space(file_length):
+		response = ApiError("Not enough storage available for file")
+
+	else:
+		try:
+			file_obj.save(path, )
+			response = ApiSuccess("File successfully uploaded", path)
+		except Exception, e:
+			response = ApiError(str(e))
+
+	return response
+
+def _valid_file(filename):
+	return filename.split(".")[1] in app.config["allowed_filetypes"]
+
+def _enough_space(file_length):
+	return True
 

@@ -21,11 +21,7 @@ def get_base_directory():
 @app.route('%s/directory' % BASE_URI, methods=['GET'])
 def directory_contents():
 
-	path = request.args.get('path', None)
-	print path
-
-	if not path:
-		abort(400)
+	path = request.args.get('path', "")
 
 	return jsonify({'files': get_directory_contents(path)})
 

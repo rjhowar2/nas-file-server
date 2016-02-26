@@ -32,11 +32,15 @@ def api_success(action, path):
 	}
 	return response
 
-def get_directory_contents(dir_path):
+def get_directory_contents(folder):
+
+	dir_path = get_full_path(folder)
+
+	print dir_path
 
 	all_files = {}
 	for path, subdirs, files in os.walk(dir_path):
-		all_files['path'] = path
+		all_files['parent'] = folder
 		children = []
 
 		def add_files(my_list, is_dir):
@@ -103,4 +107,8 @@ def _valid_file(filename):
 
 def _enough_space(file_length):
 	return True
+
+def get_full_path(folder):
+	folder = folder.lstrip("/")
+	return "%s/%s" % (app.config['base_directory'], folder)
 

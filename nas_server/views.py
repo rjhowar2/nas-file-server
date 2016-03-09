@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request, abort, send_from_directory, make_response
-from werkzeug import secure_filename
 import os
 import json
 
@@ -48,15 +47,13 @@ def delete():
 
 @app.route('%s/files' % BASE_URI, methods=['POST'])
 def upload():
-	directory_path = request.form['directory_path']
+	folder = request.form.get("folder", "")
 	file_body = request.files['file']
 	
-	if not all ([file_body, directory_path]):
+	if not file_body:
 		return abort(400)
 
-	fullpath = "%s/%s" % (directory_path, secure_filename(file_body.filename))
-
-	response = save_file(fullpath, file_body)
+	response = save_file(folder, file_body)
 
 	return jsonify(response)
 

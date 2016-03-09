@@ -1,5 +1,6 @@
 import os
 import shutil
+from werkzeug import secure_filename
 
 from nas_server import app
 from tests.test_utils import TEST_DIR, rebuild_test_tree
@@ -83,7 +84,7 @@ def delete_resource(path):
 
 	return response
 
-def save_file(path, file_obj):
+def save_file(folder, file_obj):
 	filename = file_obj.filename
 	file_length = file_obj.content_length
 
@@ -95,8 +96,9 @@ def save_file(path, file_obj):
 
 	else:
 		try:
-			file_obj.save(path, )
-			response = ApiSuccess("File successfully uploaded", path)
+			fullpath = "%s/%s" % (get_full_path(folder), secure_filename(filename))
+			file_obj.save(fullpath, )
+			response = ApiSuccess("File successfully uploaded", fullpath)
 		except Exception, e:
 			response = ApiError(str(e))
 
@@ -108,7 +110,7 @@ def _valid_file(filename):
 def _enough_space(file_length):
 	return True
 
-def get_full_path(folder):
+def get_full_path(folder=""):
 	folder = folder.lstrip("/")
-	return "%s/%s" % (app.config['base_directory'], folder)
+	return "%s/%s".rstrip("/") % (app.config['base_directory'], folder)
 

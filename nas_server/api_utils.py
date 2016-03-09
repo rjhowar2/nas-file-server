@@ -112,5 +112,6 @@ def _enough_space(file_length):
 
 def get_full_path(folder=""):
 	folder = folder.lstrip("/")
-	return "%s/%s".rstrip("/") % (app.config['base_directory'], folder)
+	path = "%s/%s" % (app.config['base_directory'], folder)
+	return path.rstrip("/")
 

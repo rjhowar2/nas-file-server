@@ -48,15 +48,13 @@ def delete():
 
 @app.route('%s/files' % BASE_URI, methods=['POST'])
 def upload():
-
-	required_args = ['filename','directory_path']
-	metadata = json.loads(request.form['metadata'])
+	directory_path = request.form['directory_path']
 	file_body = request.files['file']
 	
-	if not all ([k in metadata for k in required_args]):
+	if not all ([file_body, directory_path]):
 		return abort(400)
 
-	fullpath = "%s/%s" % (metadata['directory_path'], secure_filename(metadata['filename']))
+	fullpath = "%s/%s" % (directory_path, secure_filename(file_body.filename))
 
 	response = save_file(fullpath, file_body)
 

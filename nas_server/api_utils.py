@@ -37,8 +37,6 @@ def get_directory_contents(folder):
 
 	dir_path = get_full_path(folder)
 
-	print dir_path
-
 	all_files = {}
 	for path, subdirs, files in os.walk(dir_path):
 		all_files['parent'] = folder
@@ -70,19 +68,24 @@ def rename_resource(source, destination):
 
 	return response
 
-def delete_resource(path):
+def delete_resource(folder, filename):
+	dir_path = get_full_path(folder)
+
 	try:
-		if os.path.isdir(path):
-			shutil.rmtree(path)
-		else:
-			os.remove(path)
-
-		response = api_success("delete", path)
-
+		for f in filename:
+			fullpath = "%s/%s" % (dir_path, f)
+			_delete(fullpath)
+		response = ApiSuccess("Files successfully removed", folder)
 	except Exception, e:
-		response = api_error(str(e))
+		response = ApiError(str(e))
 
 	return response
+
+def _delete(path):
+	if os.path.isdir(path):
+		shutil.rmtree(path)
+	else:
+		os.remove(path)
 
 def save_file(folder, file_obj):
 	filename = file_obj.filename
@@ -98,7 +101,7 @@ def save_file(folder, file_obj):
 		try:
 			fullpath = "%s/%s" % (get_full_path(folder), secure_filename(filename))
 			file_obj.save(fullpath, )
-			response = ApiSuccess("File successfully uploaded", fullpath)
+			response = ApiSuccess("File successfully uploaded", "%s/%s" % (folder,filename))
 		except Exception, e:
 			response = ApiError(str(e))
 

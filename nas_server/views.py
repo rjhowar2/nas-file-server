@@ -36,14 +36,17 @@ def update():
 
 	return jsonify(rename_resource(source, destination))
 
-@app.route('%s/files' % BASE_URI, methods=['DELETE'])
+@app.route('%s/files/deletes' % BASE_URI, methods=['POST'])
 def delete():
-	path = request.args.get('path', None)
+	folder = request.form.get('folder', "")
+	filename = request.form.getlist('filename', None)
 
-	if not path:
+	if not all (filename):
 		abort(400)
 
-	return jsonify(delete_resource(path))
+	response = delete_resource(folder, filename)
+
+	return jsonify(response)
 
 @app.route('%s/files' % BASE_URI, methods=['POST'])
 def upload():

@@ -107,6 +107,16 @@ def save_file(folder, file_obj):
 
 	return response
 
+def new_directory(folder, name):
+	try:
+		fullpath = "%s/%s" % (get_full_path(folder), name)
+		os.mkdir(fullpath)
+		response = ApiSuccess("New folder created", "%s/%s" % (folder,name))
+	except Exception, e:
+		response = ApiError(str(e))
+	
+	return response 
+
 def _valid_file(filename):
 	return filename.split(".")[1] in app.config["allowed_filetypes"]
 

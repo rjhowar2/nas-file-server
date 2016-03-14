@@ -3,7 +3,7 @@ import os
 import json
 
 from nas_server import app
-from nas_server.api_utils import get_directory_contents, rename_resource, delete_resource, save_file, ApiError, ApiSuccess
+from nas_server.api_utils import get_directory_contents, rename_resource, delete_resource, save_file, new_directory, ApiError, ApiSuccess
 from tests.test_utils import rebuild_test_tree, TEST_DIR
 
 BASE_URI = '/nas_server/api/v1.0'
@@ -23,6 +23,18 @@ def directory_contents():
 	path = request.args.get('path', "")
 
 	return jsonify({'files': get_directory_contents(path)})
+
+@app.route('%s/directory/create' % BASE_URI, methods=['POST'])
+def create():
+	folder = request.form.get('folder', "")
+	name = request.form.get('name', None)
+
+	if not name:
+		abort(400)
+
+	response = new_directory(folder, name)
+
+	return jsonify(response)
 
 @app.route('%s/files' % BASE_URI, methods=['PUT'])
 def update():

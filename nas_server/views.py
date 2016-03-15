@@ -1,12 +1,24 @@
-from flask import Flask, jsonify, request, abort, send_from_directory, make_response
 import os
 import json
+from functools import wraps
+from flask import Flask, jsonify, request, abort, send_from_directory, make_response
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 from nas_server import app
 from nas_server.api_utils import get_directory_contents, rename_resource, delete_resource, save_file, new_directory, ApiError, ApiSuccess
 from tests.test_utils import rebuild_test_tree, TEST_DIR
 
 BASE_URI = '/nas_server/api/v1.0'
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not _check_auth(auth.username):
+        	print auth.username
+        	abort(401)
+        return f(*args, **kwargs)
+    return decorated
 
 @app.route('%s/test_app' % BASE_URI, methods=['GET'])
 def reset_test_files():
@@ -82,15 +94,38 @@ def download():
 
 	return send_from_directory(dir_path, filename)
 
+@app.route('%s/token' % BASE_URI, methods=['GET'])
+def auth_token():
+	auth = request.authorization
+
+	if not auth or not (auth.username == app.config['CLIENT_ID'] and auth.password == app.config['CLIENT_SECRET']):
+		abort(401)
+
+	return jsonify({'token': _generate_auth_token(auth.username)})
+
+def _generate_auth_token(user_id, expiration=600):
+	s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+	return s.dumps(user_id)
+
+def _check_auth(token):
+	s = Serializer(app.config['SECRET_KEY'])
+	try:
+		data = s.loads(token)
+	except SignatureExpired:
+		return None    # valid token, but expired
+	except BadSignature:
+		return None    # invalid token
+	return True
+
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify(ApiError("Not found")), 404)
+    return make_response(jsonify(ApiError("Not found", code=404)), 404)
 
 @app.errorhandler(400)
-def not_found(error):
-    return make_response(jsonify(ApiError("Bad request")), 400)
+def bad_request(error):
+    return make_response(jsonify(ApiError("Bad request", code=400)), 400)
 
 @app.errorhandler(405)
-def not_found(error):
-    return make_response(jsonify(ApiError("Method not allowed")), 405)
+def method_not_allowed(error):
+    return make_response(jsonify(ApiError("Method not allowed", code=405)), 405)
 

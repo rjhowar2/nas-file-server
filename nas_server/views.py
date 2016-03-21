@@ -1,11 +1,11 @@
-import os
 import json
 from functools import wraps
-from flask import Flask, jsonify, request, abort, send_from_directory, make_response
+from flask import Flask, jsonify, request, abort, make_response
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 from nas_server import app
-from nas_server.api_utils import get_directory_contents, rename_resource, delete_resource, save_file, new_directory, ApiError, ApiSuccess
+from nas_server.api_utils import (get_directory_contents, rename_resource, delete_resource, save_file, 
+	new_directory, download_files, ApiError, ApiSuccess)
 from tests.test_utils import rebuild_test_tree, TEST_DIR
 
 BASE_URI = '/nas_server/api/v1.0'
@@ -15,7 +15,6 @@ def auth_required(f):
     def decorated(*args, **kwargs):
         auth = request.authorization
         if not auth or not _check_auth(auth.username):
-        	print auth.username
         	abort(401)
         return f(*args, **kwargs)
     return decorated
@@ -84,15 +83,15 @@ def upload():
 
 	return jsonify(response)
 
-@app.route('%s/files' % BASE_URI, methods=['GET'])
+@app.route('%s/files/downloads' % BASE_URI, methods=['POST'])
 def download():
-	dir_path = request.args.get('path', None)
-	filename = request.args.get('filename', None)
+	dir_path = request.form.get('folder', "")
+	filename = request.form.getlist('filename', None)
 
-	if not dir_path:
+	if not filename:
 		abort(400)
 
-	return send_from_directory(dir_path, filename)
+	return download_files(dir_path, filename)
 
 @app.route('%s/token' % BASE_URI, methods=['GET'])
 def auth_token():

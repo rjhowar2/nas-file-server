@@ -22,6 +22,8 @@ def main(argv):
 			test_mode = True
 		if opt == "-d":
 			base_dir = arg
+		if opt == "-p":
+			port = arg
 
 	app.config['test_mode'] = test_mode
 	app.config['base_directory'] = base_dir

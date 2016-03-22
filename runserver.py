@@ -22,7 +22,7 @@ def main(argv):
 		if opt == "-d":
 			base_dir = arg
 		if opt == "-p":
-			port = arg
+			port = int(arg)
 
 	app.config['test_mode'] = test_mode
 	app.config['base_directory'] = base_dir

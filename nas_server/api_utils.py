@@ -40,6 +40,8 @@ def get_directory_contents(folder):
 
     dir_path = get_full_path(folder)
 
+    print dir_path
+
     all_files = {}
     for path, subdirs, files in os.walk(dir_path):
         all_files['parent'] = folder
@@ -138,11 +140,12 @@ def download_files(folder, files):
 
 
 def _valid_file(filename):
-    return filename.split(".")[1] in app.config["allowed_filetypes"]
+    extension = filename.split(".")[-1] 
+    return extension in app.config["allowed_filetypes"]
 
 def _enough_space(file_length):
     return True
 
 def get_full_path(folder=""):
-    return os.path.join(app.config['base_directory'], folder)
+    return os.path.join(app.config['base_directory'], folder.lstrip("/"))
 

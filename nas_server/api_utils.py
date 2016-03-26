@@ -40,8 +40,6 @@ def get_directory_contents(folder):
 
     dir_path = get_full_path(folder)
 
-    print dir_path
-
     all_files = {}
     for path, subdirs, files in os.walk(dir_path):
         all_files['parent'] = folder
@@ -64,12 +62,14 @@ def get_directory_contents(folder):
 
     return all_files
 
-def rename_resource(source, destination):
+def rename_resource(folder, old_name, new_name):
+    source = os.path.join(get_full_path(folder), old_name)
+    destination = os.path.join(get_full_path(folder), new_name)
     try:
         os.rename(source, destination)
-        response = api_success("update", destination)
-    except:
-        response = api_error("Could not update source")
+        response = ApiSuccess("update successful", os.path.join(folder, new_name))
+    except Exception, e:
+        response = ApiError(str(e))
 
     return response
 

@@ -51,13 +51,14 @@ def create():
 def update():
 	required_args = ['source', 'destination']
 	
-	if not request.json or not  all ([k in request.json for k in required_args]):
+	if not request.json or not all ([k in request.json for k in required_args]):
 		abort(400)
 
 	source = request.json['source']
 	destination = request.json['destination']
+	folder = request.json.get('folder', '');
 
-	return jsonify(rename_resource(source, destination))
+	return jsonify(rename_resource(folder, source, destination))
 
 @app.route('%s/files/deletes' % BASE_URI, methods=['POST'])
 def delete():

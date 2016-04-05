@@ -6,7 +6,6 @@ from werkzeug import secure_filename
 from flask import send_from_directory, send_file
 
 from nas_server import app
-from tests.test_utils import TEST_DIR, rebuild_test_tree
 
 def api_error(message,code=None):
     response = {
@@ -28,13 +27,6 @@ class ApiSuccess(dict):
     def __init__(self, action, path):
         self["action"] = action
         self["path"] = path
-
-def api_success(action, path):
-    response = {
-        "action": action,
-        "path": path
-    }
-    return response
 
 def get_directory_contents(folder):
 
@@ -147,5 +139,5 @@ def _enough_space(file_length):
     return True
 
 def get_full_path(folder=""):
-    return os.path.join(app.config['base_directory'], folder.lstrip("/"))
+    return os.path.join(app.config['FILES_DIRECTORY'], folder.lstrip("/"))
 
